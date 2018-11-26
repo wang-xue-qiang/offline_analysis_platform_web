@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.beifeng.ae.model.LocationDimension">
+    <resultMap type="com.beifeng.ae.model.LocationDimension" id="locationMapper">
+        <id column="id" property="id"/>
+        <result column="country" property="country" />
+        <result column="province" property="province" />
+        <result column="city" property="city" />
+    </resultMap>
+    
+    <select id="getLocationDimension" parameterType="com.beifeng.ae.model.LocationDimension" resultMap="locationMapper">
+          SELECT id,country,province,city
+          FROM dimension_location
+          <where>
+             <if test="id != 0">
+                 id = #{id}
+             </if>
+             <if test="country != null and country != ''">
+                AND country = #{country}
+             </if>
+             <if test="province != null and province != ''">
+                AND province = #{province}
+             </if>
+             <if test="city != null and city != ''">
+                AND city = #{city}
+             </if>
+          </where>
+     </select>
+</mapper>

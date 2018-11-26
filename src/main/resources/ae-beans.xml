@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:hdp="http://www.springframework.org/schema/hadoop"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:cache="http://www.springframework.org/schema/cache"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:oxm="http://www.springframework.org/schema/oxm"
+    xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/cache
+        http://www.springframework.org/schema/cache/spring-cache.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util-4.0.xsd
+        " default-autowire="byName">
+    <!-- 创建jdbc -->
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:jdbc.properties</value>
+            </list>
+        </property>
+    </bean>
+
+	<import resource="classpath*:aeConfigContext.xml" /> <!-- ae相关配置信息 -->    
+
+	 <bean id="aeDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+        destroy-method="close">
+        <property name="driverClass" value="${jdbc.driverClassName}"></property>
+        <property name="jdbcUrl" value="${jdbc.url}"></property>
+        <property name="user" value="${jdbc.username}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+        <property name="minPoolSize" value="${jdbc.minPoolSize}"></property>
+        <property name="maxPoolSize" value="${jdbc.maxPoolSize}"></property>
+        <property name="acquireIncrement" value="${jdbc.acquireIncrement}"></property>
+        <property name="initialPoolSize" value="${jdbc.initialPoolSize}"></property>
+        <property name="testConnectionOnCheckout" value="${jdbc.testConnectionOnCheckout}"></property>
+        <property name="idleConnectionTestPeriod" value="${jdbc.idleConnectionTestPeriod}"></property>
+        <property name="maxIdleTime" value="${jdbc.maxIdleTime}"></property>
+    </bean> 
+
+
+	<bean id="aeSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="aeDataSource" />
+        <property name="mapperLocations">
+            <value>classpath*:com/beifeng/ae/**/*Mapper.xml</value>
+        </property>
+    </bean>
+
+    <bean id="aeSqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">  
+        <constructor-arg index="0" ref="aeSqlSessionFactory" />
+    </bean>    
+        
+    <!-- 具体service bean -->
+    <bean id="userBehaviorSpeedRateService" class="com.beifeng.ae.service.impl.UserBehaviorSpeedRateServiceImpl"></bean>
+    <!-- 具体service bean结束 -->
+
+    <!-- bucket.metric 对应的计算类bean -->
+    <bean id="user_behavior.active_user_rate" class="com.beifeng.ae.calculate.impl.ActiveRateCalculater"/>
+    <!-- bucket.metric 对应的计算类bean结束 -->
+
+    <!-- dao相关bean -->
+    <bean id="baseDao" abstract="true">
+        <property name="sqlSessionTemplate" ref="aeSqlSessionTemplate" />
+    </bean>
+    <bean id="aeDao" class="com.beifeng.ae.dao.mybatis.AEDao" parent="baseDao"></bean>
+    <bean id="dimensionDao" class="com.beifeng.ae.dao.impl.DimensionDaoImpl" parent="baseDao"></bean>
+    <bean id="dateDimensionDao" class="com.beifeng.ae.dao.impl.DateDimensionDaoImpl" parent="baseDao"></bean>
+    <bean id="platformDimeDao" class="com.beifeng.ae.dao.impl.PlatformDimensionDaoImpl" parent="baseDao"></bean>
+    <bean id="kpiDimeDao" class="com.beifeng.ae.dao.impl.KpiDimensionDaoImpl" parent="baseDao"></bean>
+    <bean id="browserDimeDao" class="com.beifeng.ae.dao.impl.BrowserDimensionDaoImpl" parent="baseDao"></bean>
+    <bean id="locationDimeDao" class="com.beifeng.ae.dao.impl.LocationDimensionDaoImpl" parent="baseDao"></bean>
+    <bean id="inboundDimeDao" class="com.beifeng.ae.dao.impl.InboundDimensionDaoImpl" parent="baseDao"></bean>
+    <bean id="eventDimeDao" class="com.beifeng.ae.dao.impl.EventDimensionDaoImpl" parent="baseDao"></bean>
+    <bean id="currencyTypeDimeDao" class="com.beifeng.ae.dao.impl.CurrencyTypeDimensionDaoImpl" parent="baseDao"></bean>
+    <bean id="paymentTypeDimeDao" class="com.beifeng.ae.dao.impl.PaymentTypeDimensionDaoImpl" parent="baseDao"></bean>
+    <!-- dao相关bean结束 -->
+
+    <!-- 共用service bean -->
+    <bean id = "aeService" class="com.beifeng.ae.service.impl.AEServiceImpl">
+        <property name="aeDao" ref="aeDao"></property>
+    </bean>
+    <bean id="dimensionService" class="com.beifeng.ae.service.impl.DimensionServiceImpl">
+        <property name="dimeDao" ref="dimensionDao"></property>
+        <property name="dateDimeDao" ref="dateDimensionDao"></property>
+        <property name="platformDimeDao" ref="platformDimeDao"></property>
+        <property name="kpiDimeDao" ref="kpiDimeDao"></property>
+        <property name="browserDimeDao" ref="browserDimeDao"></property>
+        <property name="locationDimeDao" ref="locationDimeDao"></property>
+        <property name="inboundDimeDao" ref="inboundDimeDao"></property>
+        <property name="eventDimeDao" ref="eventDimeDao"></property>
+        <property name="currencyTypeDimeDao" ref="currencyTypeDimeDao"></property>
+        <property name="paymentTypeDimeDao" ref="paymentTypeDimeDao"></property>
+    </bean>
+    <bean class="com.beifeng.ae.util.ApplicationContextUtil"/>
+    <!-- 共用service bean结束 -->
+</beans>

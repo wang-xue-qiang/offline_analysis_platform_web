@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.beifeng.ae.model.PlatformDimension">
+    <resultMap type="com.beifeng.ae.model.PlatformDimension" id="platformMapper">
+        <id column="id" property="id"/>
+        <result column="platform_name" property="platform" />
+    </resultMap>
+    
+    <select id="getPlatformDimension" parameterType="com.beifeng.ae.model.PlatformDimension" resultMap="platformMapper">
+          SELECT id,platform_name FROM dimension_platform
+          <where>
+             <if test="id != 0">
+                 id = #{id}
+             </if>
+             <if test="platform != null and platform != ''">
+                AND platform_name = #{platform}
+             </if>
+          </where>
+     </select>
+</mapper>

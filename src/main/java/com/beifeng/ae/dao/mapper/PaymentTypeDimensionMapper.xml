@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.beifeng.ae.model.PaymentTypeDimension">
+    <resultMap type="com.beifeng.ae.model.PaymentTypeDimension" id="paymentTypeMapper">
+        <id column="id" property="id"/>
+        <result column="payment_type" property="paymentType" />
+    </resultMap>
+    
+    <select id="getPaymentTypeDimension" parameterType="com.beifeng.ae.model.PaymentTypeDimension" resultMap="paymentTypeMapper">
+          SELECT id,payment_type FROM dimension_payment_type
+          <where>
+             <if test="id != 0">
+                 id = #{id}
+             </if>
+             <if test="paymentType != null and paymentType != ''">
+                AND payment_type = #{paymentType}
+             </if>
+          </where>
+     </select>
+</mapper>
